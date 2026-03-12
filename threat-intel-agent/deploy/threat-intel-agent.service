@@ -1,0 +1,41 @@
+[Unit]
+Description=Threat Intelligence Analyst Agent — Daily Security Briefing
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=threat-intel
+Group=threat-intel
+WorkingDirectory=/opt/threat-intel-agent
+ExecStart=/opt/threat-intel-agent/venv/bin/python main.py
+EnvironmentFile=/opt/threat-intel-agent/.env
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/threat-intel-agent/data /opt/threat-intel-agent/reports
+ReadOnlyPaths=/var/log/syslog /var/log/auth.log /var/log/kern.log /var/log/nginx
+ProtectHome=true
+PrivateTmp=true
+
+# Prevent the agent from touching nginx or any network-facing service
+# The agent cannot bind to any ports or modify systemd units
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+SystemCallFilter=~@privileged @resources
+
+# Resource limits
+MemoryMax=1G
+CPUQuota=80%
+
+# Timeouts — the agent pipeline can take a while
+TimeoutStartSec=600
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=threat-intel-agent
+
+[Install]
+WantedBy=multi-user.target

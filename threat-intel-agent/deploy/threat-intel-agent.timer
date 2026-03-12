@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily trigger for Threat Intelligence Analyst Agent
+
+[Timer]
+# Run daily at 6:00 AM UTC
+OnCalendar=*-*-* 06:00:00
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
